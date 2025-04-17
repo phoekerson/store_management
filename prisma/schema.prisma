@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        Int     @id @default(autoincrement())
+  role_name String
+  created_at DateTime
+  updated_at DateTime
+
+  users     User[]
+}
+
+model User {
+  id         Int     @id @default(autoincrement())
+  firstname  String
+  lastname   String
+  email      String  @unique
+  password   String
+  created_at DateTime
+  updated_at DateTime
+
+  roles_id   Int
+  role       Role    @relation(fields: [roles_id], references: [id])
+
+  products   Product[]
+  sales      Sale[]
+}
+
+model Category {
+  id         Int     @id @default(autoincrement())
+  cat_name   String
+  created_at DateTime
+  updated_at DateTime
+
+  products   Product[]
+}
+
+model Product {
+  id           Int     @id @default(autoincrement())
+  pro_name     String
+  pro_price    Int
+  pro_desc     String
+  created_at   DateTime
+  updated_at   DateTime
+
+  categories_id Int
+  users_id      Int
+
+  category     Category @relation(fields: [categories_id], references: [id])
+  user         User     @relation(fields: [users_id], references: [id])
+  bills        Bill[]
+}
+
+model Sale {
+  id         Int     @id @default(autoincrement())
+  sale_code  String  @unique
+  created_at DateTime
+  updated_at DateTime
+
+  users_id   Int
+  user       User    @relation(fields: [users_id], references: [id])
+
+  payments   Payment[]
+}
+
+model Bill {
+  id           Int     @id @default(autoincrement())
+  qty          Int
+  bill_code    String  @unique
+  created_at   DateTime
+  updated_at   DateTime
+
+  products_id  Int
+  prix_vente   Int
+  total        Int
+
+  product      Product @relation(fields: [products_id], references: [id])
+}
+
+model Paymethod {
+  id         Int     @id @default(autoincrement())
+  pay_name   String  @unique
+  created_at DateTime
+  updated_at DateTime
+
+  payments   Payment[]
+}
+
+model Payment {
+  id           Int     @id @default(autoincrement())
+  created_at   DateTime
+  updated_at   DateTime
+
+  paymethods_id Int
+  sales_id      Int
+
+  paymethod    Paymethod @relation(fields: [paymethods_id], references: [id])
+  sale         Sale      @relation(fields: [sales_id], references: [id])
+}
