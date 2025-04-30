@@ -8,7 +8,7 @@ export default function EditCategory() {
   const [name, setName] = useState("")
 
   useEffect(() => {
-    fetch(`/api/categories/${id}`)
+    fetch(`/api/categorie/${id}`)
       .then(res => res.json())
       .then(data => setName(data.cat_name))
   }, [id])
@@ -16,13 +16,13 @@ export default function EditCategory() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    await fetch(`/api/categories/${id}`, {
+    await fetch(`/api/categorie/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cat_name: name }),
     })
 
-    router.push("/admin/categories")
+    router.push("/admin/categorie")
   }
 
   return (

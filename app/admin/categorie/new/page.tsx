@@ -9,13 +9,13 @@ export default function NewCategory() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    await fetch("/api/categories", {
+    await fetch("/api/categorie", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cat_name: name }),
     })
 
-    router.push("/admin/categories")
+    router.push("/admin/categorie")
   }
 
   return (
