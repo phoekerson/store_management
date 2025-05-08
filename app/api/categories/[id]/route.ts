@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const category = await prisma.category.findUnique({
-    where: { id: parseInt(params.id) }
-  })
 
-  return NextResponse.json(category)
+export async function GET() {
+  try {
+    const categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        cat_name: true,
+      },
+    })
+    return NextResponse.json(categories)
+  } catch (error) {
+    console.error('Erreur récupération catégories:', error)
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
 }
+
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   const body = await req.json()

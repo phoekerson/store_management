@@ -12,6 +12,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Role {
@@ -53,6 +54,7 @@ model Product {
   pro_name     String
   pro_price    Int
   pro_desc     String
+  pro_img      String
   created_at   DateTime
   updated_at   DateTime
 
