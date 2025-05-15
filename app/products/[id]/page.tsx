@@ -68,7 +68,7 @@ export default function ProductDetailPage() {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'CFA'
     }).format(price);
   };
 

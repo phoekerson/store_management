@@ -31,9 +31,7 @@ export default function Home() {
         transition={{ delay: 1, duration: 1 }}
         className="flex gap-4"
       >
-        <Link href="/admin/categorie">
-          <Button size="lg">Espace Admin</Button>
-        </Link>
+        
         <Link href="/products">
           <Button size="lg" variant="outline">Découvrir</Button>
         </Link>

@@ -60,7 +60,7 @@ export default function ProductsPage() {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'CFA'
     }).format(price);
   };
 

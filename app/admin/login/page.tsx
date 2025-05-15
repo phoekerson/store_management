@@ -18,7 +18,7 @@ export default function LoginPage() {
 
     if (res.ok) {
       alert('Connexion réussie')
-      router.push('/admin')
+      router.push('/admin/products')
     } else {
       alert('Erreur de connexion')
     }
