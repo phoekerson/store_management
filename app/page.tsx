@@ -34,7 +34,7 @@ export default function Home() {
         <Link href="/admin/categorie">
           <Button size="lg">Espace Admin</Button>
         </Link>
-        <Link href="#features">
+        <Link href="/products">
           <Button size="lg" variant="outline">Découvrir</Button>
         </Link>
       </motion.div>
