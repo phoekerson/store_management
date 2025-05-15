@@ -18,7 +18,7 @@ export default function Header() {
   return (
     <header className="bg-white shadow-md">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold text-blue-600">Shop X</Link>
+        <Link href="/" className="text-2xl font-bold text-blue-600">WikiLeaks</Link>
         
         <nav className="hidden md:flex space-x-8">
           <Link 

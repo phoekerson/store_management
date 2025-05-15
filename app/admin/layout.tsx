@@ -28,7 +28,7 @@ export default function AdminLayout({
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
                 <Link href="/admin" className="text-xl font-bold text-blue-600">
-                  Admin E-Commerce
+                  Admin WikiLeaks
                 </Link>
               </div>
             </div>
