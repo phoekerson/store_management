@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import {authOptions} from "@/lib/auth"
+import { getServerSession } from 'next-auth'
+import { getToken } from 'next-auth/jwt';
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
     const sale = await prisma.sale.create({
       data: {
         sale_code,
-        users_id: session.user.id,
+        users_id: parseInt(session.user.id),
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -44,10 +45,28 @@ export async function POST(request: Request) {
       })
     );
 
-    // Créer un paiement par défaut (carte)
+    // Vérifier si la méthode de paiement par carte existe
+    let paymethod = await prisma.paymethod.findFirst({
+      where: {
+        pay_name: 'Carte bancaire'
+      }
+    });
+
+    // Si la méthode de paiement n'existe pas, la créer
+    if (!paymethod) {
+      paymethod = await prisma.paymethod.create({
+        data: {
+          pay_name: 'Carte bancaire',
+          created_at: new Date(),
+          updated_at: new Date(),
+        }
+      });
+    }
+
+    // Créer un paiement
     await prisma.payment.create({
       data: {
-        paymethods_id: 1, // ID de la méthode de paiement par carte
+        paymethods_id: paymethod.id,
         sales_id: sale.id,
         created_at: new Date(),
         updated_at: new Date(),

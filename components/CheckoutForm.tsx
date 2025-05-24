@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import InvoicePDF from './InvoicePDF';
+import { useSession } from 'next-auth/react';
 
 export default function CheckoutForm() {
   const { cartItems, totalAmount, clearCart } = useCart();
   const router = useRouter();
+  const { data: session } = useSession();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState({
@@ -20,8 +22,8 @@ export default function CheckoutForm() {
     date: ''
   });
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
+    fullName: session?.user?.name || '',
+    email: session?.user?.email || '',
     address: '',
     city: '',
     postalCode: '',
@@ -52,6 +54,10 @@ export default function CheckoutForm() {
     setIsProcessing(true);
 
     try {
+      if (!session?.user) {
+        throw new Error('Vous devez être connecté pour effectuer un achat');
+      }
+
       // Simulation d'une requête de paiement
       await new Promise(resolve => setTimeout(resolve, 2000));
       
@@ -76,7 +82,6 @@ export default function CheckoutForm() {
         total: totalAmount
       };
 
-      // Envoyer les données à l'API
       const response = await fetch('/api/bills', {
         method: 'POST',
         headers: {
@@ -91,10 +96,12 @@ export default function CheckoutForm() {
 
       setShowInvoice(true);
       toast.success('Paiement effectué avec succès !');
-      
-      // Ne pas rediriger immédiatement pour permettre le téléchargement de la facture
-    } catch (error) {
-      toast.error('Une erreur est survenue lors du paiement.');
+    } catch (error: any) {
+      toast.error(error.message || 'Une erreur est survenue lors du paiement.');
+      if (!session?.user) {
+        router.push('/auth/login');
+      }
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -103,6 +110,11 @@ export default function CheckoutForm() {
     clearCart();
     router.push('/order-confirmation');
   };
+
+  if (!session?.user) {
+    router.push('/auth/login');
+    return null;
+  }
 
   if (cartItems.length === 0) {
     router.push('/cart');

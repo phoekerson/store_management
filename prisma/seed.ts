@@ -4,43 +4,30 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Vérifier si le rôle 'admin' existe déjà
-  const adminExists = await prisma.role.findFirst({
-    where: { role_name: 'admin' }
-  })
+  // Créer les rôles par défaut
+  const roles = ['USER', 'ADMIN']
 
-  // Si le rôle 'admin' n'existe pas, le créer
-  if (!adminExists) {
-    await prisma.role.create({
-      data: {
-        role_name: 'admin',
-        created_at: new Date(),
-        updated_at: new Date()
+  for (const roleName of roles) {
+    // Vérifier si le rôle existe
+    const existingRole = await prisma.role.findFirst({
+      where: {
+        role_name: roleName
       }
     })
-    console.log('Rôle admin créé avec succès')
+
+    if (!existingRole) {
+      await prisma.role.create({
+        data: {
+          role_name: roleName,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      })
+      console.log(`Rôle ${roleName} créé avec succès`)
+    }
   }
 
-  // Vérifier si le rôle 'user' existe déjà
-  const userExists = await prisma.role.findFirst({
-    where: { role_name: 'user' }
-  })
-
-  // Si le rôle 'user' n'existe pas, le créer
-  if (!userExists) {
-    await prisma.role.create({
-      data: {
-        role_name: 'user',
-        created_at: new Date(),
-        updated_at: new Date()
-      }
-    })
-    console.log('Rôle user créé avec succès')
-  }
-
-  // Afficher tous les rôles pour vérification
-  const roles = await prisma.role.findMany()
-  console.log('Rôles disponibles dans la base de données:', roles)
+  console.log('Initialisation des rôles terminée')
 }
 
 main()

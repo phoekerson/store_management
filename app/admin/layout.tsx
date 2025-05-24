@@ -2,12 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import AdminNav from '@/components/AdminNav';
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    redirect('/');
+  }
+
   const pathname = usePathname();
 
   // Menu items configuration
@@ -21,6 +31,8 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <h1 className="text-3xl font-bold mb-6">Administration</h1>
+      <AdminNav />
       {/* Top Navigation */}
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
