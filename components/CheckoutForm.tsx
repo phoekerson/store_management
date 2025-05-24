@@ -7,11 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import InvoicePDF from './InvoicePDF';
 
 export default function CheckoutForm() {
   const { cartItems, totalAmount, clearCart } = useCart();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState({
+    invoiceNumber: '',
+    date: ''
+  });
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -31,6 +38,15 @@ export default function CheckoutForm() {
     }));
   };
 
+  const generateInvoiceNumber = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    return `INV-${year}${month}${day}-${random}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
@@ -39,20 +55,100 @@ export default function CheckoutForm() {
       // Simulation d'une requête de paiement
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Simuler une confirmation de commande
-      clearCart();
+      // Générer les données de la facture
+      const invoiceNumber = generateInvoiceNumber();
+      const date = new Date().toLocaleDateString('fr-FR');
+      
+      setInvoiceData({
+        invoiceNumber,
+        date
+      });
+
+      // Créer la facture dans la base de données
+      const billData = {
+        sale_code: invoiceNumber,
+        items: cartItems.map(item => ({
+          products_id: item.id,
+          qty: item.quantity,
+          prix_vente: item.pro_price,
+          total: item.pro_price * item.quantity
+        })),
+        total: totalAmount
+      };
+
+      // Envoyer les données à l'API
+      const response = await fetch('/api/bills', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(billData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la création de la facture');
+      }
+
+      setShowInvoice(true);
       toast.success('Paiement effectué avec succès !');
-      router.push('/order-confirmation');
+      
+      // Ne pas rediriger immédiatement pour permettre le téléchargement de la facture
     } catch (error) {
       toast.error('Une erreur est survenue lors du paiement.');
-    } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleFinalize = () => {
+    clearCart();
+    router.push('/order-confirmation');
   };
 
   if (cartItems.length === 0) {
     router.push('/cart');
     return null;
+  }
+
+  if (showInvoice) {
+    return (
+      <div className="container mx-auto p-4 max-w-2xl">
+        <div className="bg-green-50 p-6 rounded-lg text-center mb-6">
+          <h2 className="text-2xl font-semibold text-green-800 mb-4">
+            Commande confirmée !
+          </h2>
+          <p className="text-green-700 mb-6">
+            Votre paiement a été traité avec succès. Vous pouvez télécharger votre facture ci-dessous.
+          </p>
+          <div className="space-y-4">
+            <PDFDownloadLink
+              document={
+                <InvoicePDF
+                  items={cartItems}
+                  totalAmount={totalAmount}
+                  invoiceNumber={invoiceData.invoiceNumber}
+                  date={invoiceData.date}
+                />
+              }
+              fileName={`facture-${invoiceData.invoiceNumber}.pdf`}
+              className="block"
+            >
+              {({ loading }) => (
+                <Button disabled={loading} className="w-full">
+                  {loading ? 'Génération...' : 'Télécharger la facture'}
+                </Button>
+              )}
+            </PDFDownloadLink>
+            <Button
+              onClick={handleFinalize}
+              variant="outline"
+              className="w-full"
+            >
+              Continuer mes achats
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
