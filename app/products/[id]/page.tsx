@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useCart } from '@/context/CartContext';
+import { Button } from '@/components/ui/button';
+import { ShoppingCart, CreditCard } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Interface pour le produit
 interface Product {
@@ -30,6 +34,7 @@ interface Product {
 export default function ProductDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -82,54 +87,75 @@ export default function ProductDetailPage() {
     }).format(date);
   };
 
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart({
+        id: product.id,
+        pro_name: product.pro_name,
+        pro_price: product.pro_price,
+        pro_img: product.pro_img
+      });
+      toast.success('Produit ajouté au panier');
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (product) {
+      handleAddToCart();
+      router.push('/checkout');
+    }
+  };
+
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-4">
+      <div className="p-4">
         <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
           <p>{error}</p>
         </div>
-        <button 
+        <Button 
+          variant="outline"
           onClick={() => router.push('/products')}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Retour aux produits
-        </button>
+        </Button>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="container mx-auto p-4">
+      <div className="p-4">
         <div className="bg-yellow-100 text-yellow-700 p-4 rounded mb-4">
           <p>Produit non trouvé</p>
         </div>
-        <button 
+        <Button 
+          variant="outline"
           onClick={() => router.push('/products')}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Retour aux produits
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="p-4">
       <nav className="mb-4">
-        <Link href="/products" className="text-blue-500 hover:underline">
+        <Button
+          variant="ghost"
+          onClick={() => router.push('/products')}
+          className="text-blue-500 hover:text-blue-700"
+        >
           &larr; Retour aux produits
-        </Link>
+        </Button>
       </nav>
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -167,12 +193,21 @@ export default function ProductDetailPage() {
             </div>
             
             <div className="flex flex-wrap gap-4 mt-6">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex-1">
+              <Button
+                onClick={handleAddToCart}
+                variant="secondary"
+                className="flex-1"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
                 Ajouter au panier
-              </button>
-              <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex-1">
+              </Button>
+              <Button
+                onClick={handleBuyNow}
+                className="flex-1"
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
                 Acheter maintenant
-              </button>
+              </Button>
             </div>
             
             <div className="mt-6 text-sm text-gray-500">

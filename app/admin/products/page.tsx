@@ -114,7 +114,7 @@ export default function AdminProductsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gestion des Produits</h1>
         <Link 
-          href="/admin/products/create" 
+          href="/admin/product/create" 
           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
         >
           Ajouter un produit
